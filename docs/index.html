@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Letter-Helper — Start</title>
+    <style>
+      body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#f7fafc;color:#0f172a}
+      .card{max-width:720px;padding:28px;border-radius:12px;background:white;box-shadow:0 6px 24px rgba(2,6,23,0.08)}
+      a{color:#0369a1}
+      pre{background:#111827;color:#e6edf3;padding:12px;border-radius:6px;overflow:auto}
+    </style>
+  </head>
+  <body>
+    <div class="card" id="card">
+      <h1>Letter-Helper</h1>
+      <p id="msg">Prüfe auf gebaute App...</p>
+      <div id="actions" style="display:none">
+        <p>Die gebaute App wurde nicht gefunden. Baue sie lokal oder veröffentliche das Verzeichnis <code>artifacts/buchstaben-app/dist/public</code> als statische Seite.</p>
+        <p>Lokale Build-Schritte (wenn Node + pnpm installiert sind):</p>
+        <pre>pnpm install
+pnpm run build</pre>
+        <p>Falls du die gebaute App direkt hosten möchtest, wähle in GitHub Pages das Verzeichnis <code>docs/</code> als Site-Ordner oder kopiere die gebauten Dateien dorthin.</p>
+      </div>
+    </div>
+
+    <script>
+      const target = '/artifacts/buchstaben-app/dist/public/index.html';
+
+      async function checkAndRedirect(){
+        try{
+          const res = await fetch(target, { method: 'HEAD' });
+          if (res.ok) {
+            // redirect to the built app folder
+            window.location.href = '/artifacts/buchstaben-app/dist/public/';
+            return;
+          }
+        }catch(e){
+          // continue to show fallback
+        }
+
+        document.getElementById('msg').textContent = 'Gebaute App nicht gefunden.';
+        document.getElementById('actions').style.display = 'block';
+      }
+
+      checkAndRedirect();
+    </script>
+  </body>
+</html>
