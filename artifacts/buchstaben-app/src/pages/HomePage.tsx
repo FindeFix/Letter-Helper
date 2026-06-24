@@ -1,24 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
 import { Settings2 } from "lucide-react";
 import { ALPHABET, type Settings } from "@/lib/types";
 import { getSettings } from "@/lib/db";
+import { isConfigured } from "@/lib/supabase";
 import FilterModal from "@/components/FilterModal";
 import LetterRow from "@/components/LetterRow";
 
-const isSupabaseConfigured =
-  import.meta.env.VITE_SUPABASE_URL &&
-  import.meta.env.VITE_SUPABASE_URL !== "your_supabase_project_url";
-
 export default function HomePage() {
+  const configured = isConfigured();
   const [settings, setSettings] = useState<Settings>({ id: "global", disabled_letters: [] });
-  const [loading, setLoading] = useState(isSupabaseConfigured);
+  const [loading, setLoading] = useState(configured);
   const [error, setError] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const loadSettings = async () => {
-    if (!isSupabaseConfigured) return;
+    if (!configured) return;
     setLoading(true);
     setError(false);
     try {
@@ -43,7 +40,7 @@ export default function HomePage() {
     <div className="min-h-[100dvh] pb-24 pt-12 px-6 max-w-4xl mx-auto flex flex-col items-center">
       <div className="w-full flex justify-between items-center mb-10 pl-4 pr-2">
         <h1 className="text-4xl font-bold text-slate-800 tracking-tight">Buchstaben lernen</h1>
-        <button 
+        <button
           onClick={() => setIsFilterOpen(true)}
           className="p-4 rounded-full bg-white shadow-sm hover:shadow-md transition-shadow text-slate-500 hover:text-primary active:scale-95"
           aria-label="Filter"
@@ -52,12 +49,12 @@ export default function HomePage() {
         </button>
       </div>
 
-      {!isSupabaseConfigured && (
+      {!configured && (
         <div className="w-full mb-8 p-6 bg-amber-50 border-2 border-amber-200 rounded-[2rem]">
           <p className="text-xl font-semibold text-amber-800 mb-1">Supabase noch nicht eingerichtet</p>
           <p className="text-lg text-amber-700">
             Trage <code className="bg-amber-100 px-1 rounded font-mono text-base">VITE_SUPABASE_URL</code> und{" "}
-            <code className="bg-amber-100 px-1 rounded font-mono text-base">VITE_SUPABASE_ANON_KEY</code> in den Secrets ein, 
+            <code className="bg-amber-100 px-1 rounded font-mono text-base">VITE_SUPABASE_ANON_KEY</code> in den Secrets ein,
             dann wird die App mit deiner Datenbank verbunden.
           </p>
         </div>
@@ -86,9 +83,9 @@ export default function HomePage() {
         </div>
       )}
 
-      <FilterModal 
-        isOpen={isFilterOpen} 
-        onClose={() => setIsFilterOpen(false)} 
+      <FilterModal
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
         settings={settings}
         onSaved={loadSettings}
       />
