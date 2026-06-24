@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "installCommand": "corepack prepare pnpm@9.0.0 --activate && pnpm install",
   "builds": [
     {
       "src": "artifacts/buchstaben-app/package.json",
