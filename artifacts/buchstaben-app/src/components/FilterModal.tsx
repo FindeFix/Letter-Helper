@@ -1,19 +1,19 @@
 import React, { useState } from "react";
-import { ALPHABET, type Settings } from "@/lib/types";
-import { updateDisabledLetters } from "@/lib/db";
+import { ALPHABET, type AppMode } from "@/lib/types";
+import { useAppContext } from "@/lib/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check } from "lucide-react";
+import { X, Check, Pencil, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  settings: Settings;
-  onSaved: () => void;
 }
 
-export default function FilterModal({ isOpen, onClose, settings, onSaved }: Props) {
+export default function FilterModal({ isOpen, onClose }: Props) {
+  const { settings, saveDisabledLetters, saveMode } = useAppContext();
   const [disabled, setDisabled] = useState<Set<string>>(new Set(settings.disabled_letters));
+  const [mode, setMode] = useState<AppMode>(settings.mode);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
@@ -27,9 +27,9 @@ export default function FilterModal({ isOpen, onClose, settings, onSaved }: Prop
   const handleSave = async () => {
     setSaving(true);
     try {
-      await updateDisabledLetters(Array.from(disabled));
+      await saveDisabledLetters(Array.from(disabled));
+      saveMode(mode);
       toast({ title: "Gespeichert!" });
-      onSaved();
       onClose();
     } catch (e) {
       toast({ title: "Fehler beim Speichern", variant: "destructive" });
@@ -42,21 +42,21 @@ export default function FilterModal({ isOpen, onClose, settings, onSaved }: Prop
 
   return (
     <AnimatePresence>
-      <motion.div 
+      <motion.div
         className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <motion.div 
+        <motion.div
           className="bg-slate-50 w-full max-w-3xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90dvh]"
           initial={{ y: 40, opacity: 0, scale: 0.95 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 20, opacity: 0, scale: 0.95 }}
         >
           <div className="px-8 py-6 bg-white flex justify-between items-center border-b border-slate-100">
-            <h2 className="text-3xl font-bold text-slate-800">Buchstaben filtern</h2>
-            <button 
+            <h2 className="text-3xl font-bold text-slate-800">Einstellungen</h2>
+            <button
               onClick={onClose}
               className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 active:scale-95 transition-all"
             >
@@ -64,24 +64,63 @@ export default function FilterModal({ isOpen, onClose, settings, onSaved }: Prop
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-8">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
-              {ALPHABET.map(l => {
-                const isActive = !disabled.has(l);
-                return (
-                  <button
-                    key={l}
-                    onClick={() => toggleLetter(l)}
-                    className={`aspect-square rounded-3xl flex items-center justify-center text-4xl sm:text-5xl font-bold transition-all active:scale-95 shadow-sm ${
-                      isActive 
-                        ? 'bg-primary text-white' 
-                        : 'bg-white text-slate-300'
-                    }`}
-                  >
-                    {l}
-                  </button>
-                );
-              })}
+          <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8">
+            {/* Mode toggle */}
+            <div>
+              <p className="text-xl font-bold text-slate-700 mb-4">Modus</p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setMode("editor")}
+                  className={`flex-1 flex flex-col items-center gap-3 py-6 px-4 rounded-[2rem] border-4 transition-all active:scale-95 ${
+                    mode === "editor"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-transparent bg-white text-slate-400"
+                  }`}
+                >
+                  <Pencil size={36} />
+                  <span className="text-2xl font-bold">Editor</span>
+                  <span className="text-sm text-center leading-snug opacity-80">
+                    Bilder & Audios hinzufügen, löschen
+                  </span>
+                </button>
+                <button
+                  onClick={() => setMode("learn")}
+                  className={`flex-1 flex flex-col items-center gap-3 py-6 px-4 rounded-[2rem] border-4 transition-all active:scale-95 ${
+                    mode === "learn"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-transparent bg-white text-slate-400"
+                  }`}
+                >
+                  <BookOpen size={36} />
+                  <span className="text-2xl font-bold">Lernen</span>
+                  <span className="text-sm text-center leading-snug opacity-80">
+                    Nur anhören, nichts ändern
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Letter filter */}
+            <div>
+              <p className="text-xl font-bold text-slate-700 mb-4">Buchstaben anzeigen</p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                {ALPHABET.map(l => {
+                  const isActive = !disabled.has(l);
+                  return (
+                    <button
+                      key={l}
+                      onClick={() => toggleLetter(l)}
+                      className={`aspect-square rounded-3xl flex items-center justify-center text-4xl sm:text-5xl font-bold transition-all active:scale-95 shadow-sm ${
+                        isActive
+                          ? "bg-primary text-white"
+                          : "bg-white text-slate-300"
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

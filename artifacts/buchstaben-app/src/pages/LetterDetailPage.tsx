@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Volume2, Mic } from "lucide-react";
-import { getLetter, upsertLetter, updateLetterExamples } from "@/lib/db";
+import { getLetter, upsertLetter, updateLetterExamples, uploadLetterAudio } from "@/lib/db";
 import { type Letter, type Example } from "@/lib/types";
+import { useAppContext } from "@/lib/AppContext";
 import { useToast } from "@/hooks/use-toast";
 import ExampleSlot from "@/components/ExampleSlot";
 import AudioRecorder from "@/components/AudioRecorder";
-import ImageCropModal from "@/components/ImageCropModal";
-import { uploadLetterAudio } from "@/lib/db";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +18,8 @@ export default function LetterDetailPage() {
   const { letter } = useParams<{ letter: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { settings } = useAppContext();
+  const mode = settings.mode;
 
   const [data, setData] = useState<Letter | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,10 +49,7 @@ export default function LetterDetailPage() {
 
   const playLetterAudio = () => {
     if (data?.audio_url) {
-      const audio = new Audio(data.audio_url);
-      audio.play();
-    } else {
-      setIsRecordingLetter(true);
+      new Audio(data.audio_url).play();
     }
   };
 
@@ -80,6 +78,29 @@ export default function LetterDetailPage() {
     );
   }
 
+  const letterButton = (
+    <button
+      onClick={() => {
+        if (mode === "learn") {
+          playLetterAudio();
+        } else {
+          if (!data.audio_url) setIsRecordingLetter(true);
+          else playLetterAudio();
+        }
+      }}
+      className="relative flex items-center justify-center px-12 py-4 rounded-[3rem] bg-white shadow-sm hover:shadow-md active:scale-95 transition-all cursor-pointer select-none"
+    >
+      <span className="text-[80px] sm:text-[100px] font-bold text-slate-800 leading-none">
+        {upper} {lower}
+      </span>
+      {data.audio_url && (
+        <div className="absolute -right-4 -top-4 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white shadow-sm">
+          <Volume2 size={24} />
+        </div>
+      )}
+    </button>
+  );
+
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden">
       {/* Sticky header */}
@@ -91,26 +112,9 @@ export default function LetterDetailPage() {
           <ArrowLeft size={32} />
         </button>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              onClick={() => {
-                if (!data.audio_url) setIsRecordingLetter(true);
-                else playLetterAudio();
-              }}
-              className="relative flex items-center justify-center px-12 py-4 rounded-[3rem] bg-white shadow-sm hover:shadow-md active:scale-95 transition-all cursor-pointer select-none"
-            >
-              <span className="text-[80px] sm:text-[100px] font-bold text-slate-800 leading-none">
-                {upper} {lower}
-              </span>
-              {data.audio_url && (
-                <div className="absolute -right-4 -top-4 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white shadow-sm">
-                  <Volume2 size={24} />
-                </div>
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          {data.audio_url && (
+        {mode === "editor" && data.audio_url ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>{letterButton}</DropdownMenuTrigger>
             <DropdownMenuContent className="p-2 rounded-2xl">
               <DropdownMenuItem
                 onClick={() => setIsRecordingLetter(true)}
@@ -120,8 +124,10 @@ export default function LetterDetailPage() {
                 Neu aufnehmen
               </DropdownMenuItem>
             </DropdownMenuContent>
-          )}
-        </DropdownMenu>
+          </DropdownMenu>
+        ) : (
+          letterButton
+        )}
 
         <div className="w-16" />
       </header>
@@ -137,6 +143,7 @@ export default function LetterDetailPage() {
                 slotId={i}
                 letterId={upper}
                 example={example}
+                mode={mode}
                 onUpdate={(ex) => {
                   const newEx = [...data.examples.filter(e => e.id !== i), ex];
                   handleUpdateExamples(newEx);

@@ -12,9 +12,12 @@ export interface Letter {
   examples: Example[];
 }
 
+export type AppMode = "editor" | "learn";
+
 export interface Settings {
   id: string;
   disabled_letters: string[];
+  mode: AppMode;
 }
 
 export const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
