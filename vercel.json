@@ -1,18 +1,6 @@
 {
   "version": 2,
-  "installCommand": "corepack prepare pnpm@9.0.0 --activate && pnpm install",
-  "builds": [
-    {
-      "src": "artifacts/buchstaben-app/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "artifacts/buchstaben-app/dist/public"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "handle": "filesystem"
-    }
-  ]
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm run vercel-build",
+  "outputDirectory": "artifacts/buchstaben-app/dist/public"
 }
