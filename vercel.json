@@ -1,0 +1,17 @@
+{
+  "version": 3,
+  "builds": [
+    {
+      "src": "artifacts/buchstaben-app/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "artifacts/buchstaben-app/dist/public"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    }
+  ]
+}
