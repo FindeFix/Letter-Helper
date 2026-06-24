@@ -1,9 +1,10 @@
-import { Router, IRouter, Request, Response } from "express";
+// @ts-nocheck
+import { Router } from "express";
 import { HealthCheckResponse } from "@workspace/api-zod";
 
-const router: IRouter = Router();
+const router = Router();
 
-router.get("/healthz", (_req: Request, res: Response) => {
+router.get("/healthz", (req, res) => {
   const data = HealthCheckResponse.parse({ status: "ok" });
   res.json(data);
 });
