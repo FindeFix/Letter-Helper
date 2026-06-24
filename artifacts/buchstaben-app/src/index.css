@@ -49,7 +49,7 @@
 
 /* LIGHT MODE - Warm, calm, earthy vibe */
 :root {
-  --background: 220 14% 91%; /* #e5e7eb */
+  --background: 220 14% 79%;
   --foreground: 222 47% 11%;
   
   --card: 0 0% 100%;
@@ -67,7 +67,7 @@
   --secondary: 35 30% 90%;
   --secondary-foreground: 25 20% 20%;
   
-  --muted: 220 14% 91%;
+  --muted: 220 14% 79%;
   --muted-foreground: 215 16% 47%;
   
   --accent: 35 80% 60%;
@@ -80,7 +80,7 @@
   --input: 214 32% 85%;
   --ring: 15 80% 60%;
   
-  --app-font-sans: 'Inter', system-ui, sans-serif;
+  --app-font-sans: 'Andika', system-ui, sans-serif;
   --radius: 1.5rem;
   
   --button-outline: rgba(0,0,0, .10);
